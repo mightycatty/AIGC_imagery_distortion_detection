@@ -1,0 +1,11 @@
+# torch
+transformers==4.40.1
+pillow
+sentencepiece
+protobuf
+scikit-image
+matplotlib
+opencv-python-headless
+numpy
+scipy
+skimage

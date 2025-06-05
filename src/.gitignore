@@ -1,0 +1,11 @@
+# Ignore all .idea directories and files
+.idea/
+
+# Other common entries
+*.log
+*.pyc
+__pycache__/
+.env
+node_modules/
+dist/
+.DS_Store
