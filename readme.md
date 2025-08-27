@@ -14,7 +14,7 @@ conda activate nitre2025
 
 ### Data Preparation
 
-Notice: This repo is developed for NTIRE2025 workshop(not for EvalMuse-40K) and might contains quite a bit of hardcodes. please make neccesary modification for your own dataset. 
+Notice: This repo was developed for the NTIRE2025 workshop (not for EvalMuse-40K) and may contain quite a bit of hardcodes. Please make the necessary modifications to adapt it to your own dataset.
 ```bash
 export DATA_ROOT=/path/to/your/data
 python code/data_process.py
