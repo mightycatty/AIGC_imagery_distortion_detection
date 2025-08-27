@@ -1,6 +1,8 @@
-## 2nd-Place Solution – Structural Distortion Detection @ NITRE 2025
+## AIGC Structural Distortion Detection and Assessment 
 
-Source code for 2nd-Place Solution for AIGC imagery Structural Distortion Detection @ NITRE 2025
+A straightforward Florence-2–based multi-task model for AIGC structural distortion detection and assessment, which achieved 2nd place in the AIGC Imagery Structural Distortion Detection track at NTIRE 2025.
+
+![Model Structure](./assets/model_structure.png)
 
 ### Environment Setup
 
@@ -12,14 +14,13 @@ conda activate nitre2025
 
 ### Data Preparation
 
+Notice: This repo is developed for NTIRE2025 workshop(not for EvalMuse-40K) and might contains quite a bit of hardcodes. please make neccesary modification for your own dataset. 
 ```bash
 export DATA_ROOT=/path/to/your/data
 python code/data_process.py
 ```
 
 ### Training
-
-#### Full Fine-Tuning
 
 ```bash
 # Configure Accelerate once before the first run
@@ -53,41 +54,17 @@ exp_name="${date}_${model}_${mask_loss}_${score_loss}_lora${lora_rank}_${score_h
 mkdir -p ./exp/experiments/${exp_name}
 
 # ───────── Launch training ─────────
-accelerate launch train_accelerate.py   --experiment_name   ${exp_name}    --lr                1e-4           --epoch             50             --batch_size        ${batch_size}   --batch_size_warmup ${batch_size_warmup}   --accumulate_step   1              --val_iter          -1             --save_iter         5              --model             ${model}       --input_size        768            --mask_size         768            --val_split         ${val_split}   --mask_loss         ${mask_loss}   --score_loss        ${score_loss}   --fp16                            --lora_rank         ${lora_rank}   --warmup_epoch      ${warmup_epoch}   --score_head        ${score_head}   --mask_head         ${mask_head}   --mode              train          --unfreeze_params   all            --negative_num      ${negative_num}   --data_path         ${data_root}   2>&1 | tee ./exp/experiments/${exp_name}/train.log
-```
-
-#### LoRA Fine-Tuning
-
-Run the script below **or** execute `train_lora.sh` in `./codes`.
-
-```bash
-#!/usr/bin/env bash
-
-export HF_ENDPOINT=https://hf-mirror.com
-
-# ───────── Hyper-parameters ─────────
-score_loss="mse"
-mask_loss="dice-mse"
-warmup_epoch=0      # warm-up is disabled for LoRA
-nproc_per_node=8
-batch_size=3
-batch_size_warmup=32
-score_head="linear"
-model="florence2"
-mask_head="concat"
-negative_num=0
-val_split=0
-lora_rank=128
-data_root=${DATA_ROOT}
-
-# ───────── Experiment name ─────────
-date=$(date +%Y%m%d)
-exp_name="${date}_${model}_${mask_loss}_${score_loss}_lora${lora_rank}_${score_head}_${mask_head}_gpu${nproc_per_node}"
-
-mkdir -p ./exp/experiments/${exp_name}
-
-# ───────── Launch training ─────────
-accelerate launch train_accelerate.py   --experiment_name   ${exp_name}    --lr                1e-4           --epoch             50             --batch_size        ${batch_size}   --batch_size_warmup ${batch_size_warmup}   --accumulate_step   1              --val_iter          -1             --save_iter         5              --model             ${model}       --input_size        768            --mask_size         768            --val_split         ${val_split}   --mask_loss         ${mask_loss}   --score_loss        ${score_loss}   --fp16                            --lora_rank         ${lora_rank}   --warmup_epoch      ${warmup_epoch}   --score_head        ${score_head}   --mask_head         ${mask_head}   --mode              train          --unfreeze_params   all            --negative_num      ${negative_num}   --data_path         ${data_root}   2>&1 | tee ./exp/experiments/${exp_name}/train.log
+accelerate launch train.py   \
+--experiment_name   ${exp_name}    \
+--lr 1e-4  --epoch 50 --batch_size ${batch_size} \
+--batch_size_warmup ${batch_size_warmup} \
+--accumulate_step   1 --val_iter -1 --save_iter 5\
+--model ${model} --input_size 768 --mask_size 768 --val_split ${val_split} \
+--mask_loss ${mask_loss} --score_loss ${score_loss} \
+--fp16 --lora_rank ${lora_rank} --warmup_epoch ${warmup_epoch} \
+--score_head ${score_head} --mask_head ${mask_head} --mode train \
+--unfreeze_params all --negative_num ${negative_num} --data_path ${data_root} \
+2>&1 | tee ./exp/experiments/${exp_name}/train.log
 ```
 
 ### Inference
